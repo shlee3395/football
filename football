@@ -1,0 +1,69 @@
+import datetime as dt
+import getpass
+
+print("="*49)
+print("       세종시 풋살장 예약 메크로 (Ver_02)")
+print("="*49)
+
+log_id = input("◐ ID:  ")
+log_pw = getpass.getpass("◐ Password:  ")
+place = input("◐ 예약장소 (1: 오가낭 1구장, 2: 오가낭 2구장):  ")
+rev_date = input("◐ 예약일자 (YYYYMMDD):  ")
+rev_time = input("◐ 예약시간 (1: 06~08시, 2: 08~10시, 3: 10~12시):  ")
+
+place_code1 = int(place) + 642
+place_code1 = float(place_code1)
+place_code2 = int(place) + 2939
+place_code2 = float(place_code2)
+
+year = int(rev_date[:4])
+month = int(rev_date[4:6])
+day = int(rev_date[6:])
+days_in_the_year = (dt.date(year, month, day) - dt.date(year,1,1)).days + 1 + (year - 2019)*365
+
+if float(place) == 1:
+    if float(rev_time) == 1:
+        date_code = 8*days_in_the_year + 478264
+        date_code = float(date_code)
+    elif float(rev_time) == 2:
+        date_code = 8*days_in_the_year + 478265
+        date_code = float(date_code)
+    else:
+        date_code = 8*days_in_the_year + 478266
+        date_code = float(date_code)              
+else:
+    if float(rev_time) == 1:
+        date_code = 8*days_in_the_year + 473864
+        date_code = float(date_code)
+    elif float(rev_time) == 2:
+        date_code = 8*days_in_the_year + 473865
+        date_code = float(date_code)
+    else:
+        date_code = 8*days_in_the_year + 473866
+        date_code = float(date_code)     
+
+import time
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+options = webdriver.ChromeOptions()
+driver = webdriver.Chrome('./chromedriver', options=options)
+
+driver.get('https://onestop.sejong.go.kr/uat/uia/egovLoginUsr.do')
+driver.find_element_by_css_selector('input#id').send_keys(log_id)
+driver.find_element_by_css_selector('input#password').send_keys(log_pw)
+driver.find_element_by_css_selector('button').click()
+
+
+while True:
+    
+    try:
+        driver.get(
+            'http://onestop.sejong.go.kr/web/rsrv/rsrvPage.do;jsessionid=79594EBB1523CF302E41B68026FCE916?OPRTN_NO=%d&ITEM_NO=%d&OPNPLN_NO=%d&FCLTS_CLSFCTN=FCLT' %(place_code1, date_code, place_code2))
+        driver.find_element_by_css_selector('#contents > p > span:nth-child(1) > span > a').click()
+        alert = driver.switch_to_alert()
+        alert.accept()
+        break
+        
+    except:
+        alert = driver.switch_to_alert()
+        alert.accept()
